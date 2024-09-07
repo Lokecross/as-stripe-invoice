@@ -54,8 +54,8 @@ function InvoiceNumber(props: { formData: FormData }) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <div className="font-bold">Invoice Number:</div>
-      <div>{props.formData.invoiceNumber}</div>
+      <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>Invoice Number:</div>
+      <div style={{ fontSize: 10, lineHeight: '14px' }}>{props.formData.invoiceNumber}</div>
     </div>
   )
 }
@@ -70,8 +70,8 @@ function InvoiceDate(props: { formData: FormData }) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <div className="font-bold">Date:</div>
-      <div>{props.formData.invoiceDate}</div>
+      <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>Date:</div>
+      <div style={{ fontSize: 10, lineHeight: '14px' }}>{props.formData.invoiceDate}</div>
     </div>
   )
 }
@@ -86,10 +86,10 @@ function BillTo(props: { formData: FormData }) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <div className="font-bold mb-2">Bill To:</div>
-      <div>{props.formData.customerName}</div>
-      <div>{props.formData.addressLine1}</div>
-      <div>{props.formData.addressLine2}</div>
+      <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>Bill To:</div>
+      <div style={{ fontSize: 10, lineHeight: '14px' }}>{props.formData.customerName}</div>
+      <div style={{ fontSize: 10, lineHeight: '14px' }}>{props.formData.addressLine1}</div>
+      <div style={{ fontSize: 10, lineHeight: '14px' }}>{props.formData.addressLine2}</div>
     </div>
   )
 }
@@ -98,25 +98,25 @@ function Table() {
   return (
     <table className="w-full">
       <thead>
-        <tr className="border-b-2 border-gray-300">
-          <th className="text-left p-2">Item</th>
-          <th className="text-right p-2">Quantity</th>
-          <th className="text-right p-2">Price</th>
-          <th className="text-right p-2">Total</th>
+        <tr style={{ height: 26, borderBottom: '1px solid #e5e7eb' }}>
+          <th className="text-left" style={{ fontSize: 10, lineHeight: '14px' }}>Item</th>
+          <th className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>Quantity</th>
+          <th className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>Price</th>
+          <th className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr className="border-b border-gray-200">
-          <td className="p-2">Widget A</td>
-          <td className="text-right p-2">2</td>
-          <td className="text-right p-2">$10.00</td>
-          <td className="text-right p-2">$20.00</td>
+        <tr style={{ height: 26, borderBottom: '1px solid #e5e7eb' }}>
+          <td className="" style={{ fontSize: 10, lineHeight: '14px' }}>Widget A</td>
+          <td className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>2</td>
+          <td className="text-right " style={{ fontSize: 10, lineHeight: '14px' }}>$10.00</td>
+          <td className="text-right " style={{ fontSize: 10, lineHeight: '14px' }}>$20.00</td>
         </tr>
-        <tr className="border-b border-gray-200">
-          <td className="p-2">Widget B</td>
-          <td className="text-right p-2">1</td>
-          <td className="text-right p-2">$15.00</td>
-          <td className="text-right p-2">$15.00</td>
+        <tr style={{ height: 26, borderBottom: '1px solid #e5e7eb' }}>
+          <td className="" style={{ fontSize: 10, lineHeight: '14px' }}>Widget B</td>
+          <td className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>1</td>
+          <td className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>$15.00</td>
+          <td className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>$15.00</td>
         </tr>
       </tbody>
     </table>
@@ -130,18 +130,18 @@ function Total(props: { formData: FormData }) {
 
   return (
     <div>
-      <div className="w-1/2 min-w-44">
-        <div className="flex justify-between py-1">
-          <div className="font-bold">Subtotal:</div>
-          <div>{currencyFormat(subtotal)}</div>
+      <div className="w-1/2 min-w-28">
+        <div className="flex justify-between">
+          <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>Subtotal:</div>
+          <div style={{ fontSize: 10, lineHeight: '14px' }}>{currencyFormat(subtotal)}</div>
         </div>
-        <div className="flex justify-between py-1">
-          <div className="font-bold">Tax ({props.formData.taxRate}%):</div>
-          <div>{currencyFormat(taxTotal)}</div>
+        <div className="flex justify-between">
+          <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>Tax ({props.formData.taxRate}%):</div>
+          <div style={{ fontSize: 10, lineHeight: '14px' }}>{currencyFormat(taxTotal)}</div>
         </div>
-        <div className="flex justify-between font-bold py-1">
-          <div>Total:</div>
-          <div>{currencyFormat(total)}</div>
+        <div className="flex justify-between font-bold">
+          <div style={{ fontSize: 10, lineHeight: '14px' }}>Total:</div>
+          <div style={{ fontSize: 10, lineHeight: '14px' }}>{currencyFormat(total)}</div>
         </div>
       </div>
     </div>
@@ -273,19 +273,18 @@ export default function Component() {
     <div>
       <DndContext onDragEnd={handleDragEnd}>
         <div className="container mx-auto p-4">
-          <Card className="w-full max-w-5xl mx-auto">
+          <Card className="w-full mx-auto">
             <CardHeader>
               <CardTitle>A4 Invoice Manager</CardTitle>
               <CardDescription>Preview and manage A4-sized invoice {watchedFields.invoiceNumber}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2">
                 <div className="order-2 lg:order-1">
-                  <div className="bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: '210mm', height: '297mm', maxWidth: '100%', maxHeight: '80vh', overflow: 'hidden' }}>
-                    <div className="w-full h-full overflow-auto text-sm" style={{ zoom: 0.75, padding: '18mm', overflow: 'hidden' }}>
-                      {/* A4-sized Invoice Preview */}
-                      <div className="text-3xl font-bold mb-8">Invoice</div>
-                      <div className="flex justify-between mb-8">
+                  <div className="bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: 595.28, height: 841.89, overflow: 'hidden' }}>
+                    <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: 50, overflow: 'hidden', gap: 20 }}>
+                      <div className="font-bold" style={{ fontSize: 20 }}>Invoice</div>
+                      <div className="flex justify-between">
                         <Droppable num={1}>
                           {componentMap[droppableContent[1]]}
                         </Droppable>
@@ -293,12 +292,12 @@ export default function Component() {
                           {componentMap[droppableContent[2]]}
                         </Droppable>
                       </div>
-                      <div className="mb-8">
+                      <div className="flex justify-between">
                         <Droppable num={3}>
                           {componentMap[droppableContent[3]]}
                         </Droppable>
                       </div>
-                      <div className="mb-8">
+                      <div className="">
                         <Table />
                       </div>
                       <div className="flex justify-end">

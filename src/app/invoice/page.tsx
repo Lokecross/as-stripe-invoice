@@ -21,6 +21,7 @@ type FormData = {
 }
 
 interface ITemplate {
+  name: string;
   columns: string[];
   lines: Array<{
       type: 'text' | 'items';
@@ -199,8 +200,8 @@ export default function Component() {
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent>
-              {templates.map((_, index) => (
-                <SelectItem value={index.toString()}>Template {index + 1}</SelectItem>
+              {templates.map((temp, index) => (
+                <SelectItem value={index.toString()}>{temp.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>

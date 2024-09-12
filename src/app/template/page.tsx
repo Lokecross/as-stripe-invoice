@@ -179,6 +179,7 @@ interface IColumn {
 export default function Component() {
   const [dropLines, setDropLines  ] = useState(3);
   const [tableLine, setTableLine] = useState(3);
+  const [templateName, setTemplateName] = useState('');
 
   const droppables = createSequentialArray(dropLines);
   const [firstLines, lastLines] = splitArray(droppables, tableLine);
@@ -270,6 +271,7 @@ export default function Component() {
     const lines = [...beforeTableLines, { type: 'items' }, ...afterTableLines];
 
     const templateConfig = {
+      name: templateName,
       columns: sendColumns,
       lines,
     };
@@ -339,7 +341,14 @@ export default function Component() {
                 <div className="order-1 lg:order-2">
                   <div className="space-y-8">
                     <div className="space-y-4">
-                      <Label>Text Block</Label>
+                      <Label>Template Name</Label>
+                      <Input
+                        value={templateName}
+                        onChange={e => setTemplateName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <Label>Text</Label>
                       {blocks.map((item, index) => (
                         <div key={item.internalId} className="flex items-center space-x-2">
                           <Input

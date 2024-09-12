@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 interface ITemplate {
+    name: string;
     columns: string[];
     lines: Array<{
         type: 'text' | 'items';
@@ -19,6 +20,7 @@ interface ITemplate {
 
 const templates: ITemplate[] = [
     {
+        "name": "Default",
         "columns": [
             "Quantity",
             "Price"

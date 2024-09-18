@@ -87,6 +87,12 @@ function generateLine(doc: PDFKit.PDFDocument, invoice: Invoice, idx: number, y:
     nextY = y;
   }
 
+  // Check if the nextY exceeds the page height
+  if (nextY > doc.page.height - 2*MARGIN) {
+    doc.addPage();
+    nextY = MARGIN; // Reset nextY to the top margin of the new page
+  }
+
   if (invoice.lines[idx + 1]) {
     return generateLine(doc, invoice, idx + 1, nextY);
   } else {

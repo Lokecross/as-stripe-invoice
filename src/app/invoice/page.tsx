@@ -186,10 +186,11 @@ export default function Component() {
     setRows(prevRows => [...prevRows, newRow]);
   };
 
+
   if (!templates) return <div>Loading...</div>
 
   if (templateIndex === "none") return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="w-full flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           <Select value={(templateIndex || 0)?.toString()} onValueChange={(newValue) => {
@@ -201,7 +202,7 @@ export default function Component() {
             </SelectTrigger>
             <SelectContent>
               {templates.map((temp, index) => (
-                <SelectItem value={index.toString()}>{temp.name}</SelectItem>
+                <SelectItem key={index} value={index.toString()}>{temp.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -279,16 +280,15 @@ export default function Component() {
   }
 
   return (
-    <div>
-      <div className="container mx-auto p-4">
-        <Card className="w-full mx-auto">
-          <CardHeader>
-            <CardTitle>A4 Invoice Manager</CardTitle>
-            <CardDescription>Preview and manage A4-sized invoice</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              <div className="order-2 lg:order-1">
+    <div className="w-full">
+      <Card className="w-full mx-auto">
+        <CardHeader>
+          <CardTitle>A4 Invoice Manager</CardTitle>
+          <CardDescription>Preview and manage A4-sized invoice</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="order-2 lg:order-1">
                 <div className="bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
                   <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: 50, overflow: 'hidden', gap: 20 }}>
                     <div className="font-bold" style={{ fontSize: 20 }}>Invoice</div>
@@ -316,87 +316,69 @@ export default function Component() {
                     })}
                   </div>
                 </div>
-              </div>
-              <div className="order-1 lg:order-2">
-              <div>
+            </div>
+            <div className="order-1 lg:order-2">
+            <div>
+                <div className="space-y-4 mb-4">
                   <div className="space-y-4 mb-4">
-                    <div className="space-y-4 mb-4">
-                      {lines.map((line, idx) => (
-                        <div key={idx}>
-                          <Label>{line.title}</Label>
-                          {line.values.map((value, valueIdx) => (
-                            <Input
-                              key={valueIdx}
-                              placeholder="String"
-                              className="mt-1"
-                              value={value}
-                              onChange={e => {
-                                const newValue = e.target.value;
-                                const newLines = lines.map((li, liIdx) => {
-                                  if (idx === liIdx) {
-                                    return { ...li, values: li.values.map((va, vaIdx) => {
-                                      if (vaIdx === valueIdx) return newValue;
-                                      return va;
-                                    }) };
-                                  }
-
-                                  return li;
-                                });
-
-                                setLines(newLines);
-                              }}
-                            />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                    <Label>Items</Label>
-                    {rows.map((item, index) => (
-                      <div key={item.id} className="flex items-center space-x-2">
-                        <Input
-                          placeholder="String"
-                          value={item.name}
-                          onChange={e => {
-                            const newValue = e.target.value;
-                            const newRows = rows.map(it => {
-                              if (it.id === item.id) {
-                                return { ...it, name: newValue };
-                              }
-
-                              return it;
-                            });
-
-                            setRows(newRows);
-                          }}
-                        />
-                        {template.columns.map((column) => (
+                    {lines.map((line, idx) => (
+                      <div key={idx}>
+                        <Label>{line.title}</Label>
+                        {line.values.map((value, valueIdx) => (
                           <Input
-                            key={column}
+                            key={valueIdx}
                             placeholder="String"
-                            value={item[column]}
+                            className="mt-1"
+                            value={value}
                             onChange={e => {
                               const newValue = e.target.value;
-                              const newRows = rows.map(it => {
-                                if (it.id === item.id) {
-                                  return { ...it, [column]: newValue };
+                              const newLines = lines.map((li, liIdx) => {
+                                if (idx === liIdx) {
+                                  return { ...li, values: li.values.map((va, vaIdx) => {
+                                    if (vaIdx === valueIdx) return newValue;
+                                    return va;
+                                  }) };
                                 }
 
-                                return it;
+                                return li;
                               });
 
-                              setRows(newRows);
+                              setLines(newLines);
                             }}
                           />
                         ))}
+                      </div>
+                    ))}
+                  </div>
+                  <Label>Items</Label>
+                  {rows.map((item, index) => (
+                    <div key={item.id} className="flex items-center space-x-2">
+                      <Input
+                        placeholder="String"
+                        value={item.name}
+                        onChange={e => {
+                          const newValue = e.target.value;
+                          const newRows = rows.map(it => {
+                            if (it.id === item.id) {
+                              return { ...it, name: newValue };
+                            }
+
+                            return it;
+                          });
+
+                          setRows(newRows);
+                        }}
+                      />
+                      {template.columns.map((column) => (
                         <Input
-                          type="number"
-                          placeholder="Number"
-                          value={item.price}
+                          key={column}
+                          placeholder="String"
+                          value={item[column]}
                           onChange={e => {
                             const newValue = e.target.value;
                             const newRows = rows.map(it => {
                               if (it.id === item.id) {
-                                return { ...it, price: Number(newValue) };
+                                return { ...it, [column]: newValue };
                               }
 
                               return it;
@@ -405,46 +387,63 @@ export default function Component() {
                             setRows(newRows);
                           }}
                         />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const newRows = rows.filter(it => it.id !== item.id);
-                            setRows(newRows);
-                          }}
-                          className="min-w-10"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className={rows.length > 0 ? "mt-2" : "ml-2"}
-                      onClick={addNewColumn}
-                    >
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Column
-                    </Button>
-                  </div>
-                  <Label>Tax Rate</Label>
-                  <Input
-                    className='mt-2'
-                    type='number'
-                    value={taxRate}
-                    onChange={e => setTaxRate(Number(e.target.value))}
-                  />
+                      ))}
+                      <Input
+                        type="number"
+                        placeholder="Number"
+                        value={item.price}
+                        onChange={e => {
+                          const newValue = e.target.value;
+                          const newRows = rows.map(it => {
+                            if (it.id === item.id) {
+                              return { ...it, price: Number(newValue) };
+                            }
 
-                  <Button className='mt-10' onClick={generateInvoice}>Submit</Button>
+                            return it;
+                          });
+
+                          setRows(newRows);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const newRows = rows.filter(it => it.id !== item.id);
+                          setRows(newRows);
+                        }}
+                        className="min-w-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={rows.length > 0 ? "mt-2" : "ml-2"}
+                    onClick={addNewColumn}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Column
+                  </Button>
                 </div>
+                <Label>Tax Rate</Label>
+                <Input
+                  className='mt-2'
+                  type='number'
+                  value={taxRate}
+                  onChange={e => setTaxRate(Number(e.target.value))}
+                />
+
+                <Button className='mt-10' onClick={generateInvoice}>Submit</Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

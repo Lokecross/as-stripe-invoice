@@ -3,12 +3,11 @@
 import { CSSProperties, ReactNode, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyPlusIcon, ListPlusIcon, PlusCircle, PlusIcon, X } from 'lucide-react'
-
 import { DndContext, DragEndEvent, useDraggable, useDroppable } from '@dnd-kit/core'
 import { Button } from '@/components/ui/button'
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Textarea } from "@/components/ui/textarea"
 
 function splitArray(arr: number[], n: number): [number[], number[]] {
   const firstPart = arr.slice(0, n - 1);
@@ -177,9 +176,10 @@ interface IColumn {
 }
 
 export default function Component() {
-  const [dropLines, setDropLines  ] = useState(3);
+  const [dropLines, setDropLines] = useState(3);
   const [tableLine, setTableLine] = useState(3);
   const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
 
   const droppables = createSequentialArray(dropLines);
   const [firstLines, lastLines] = splitArray(droppables, tableLine);
@@ -272,6 +272,7 @@ export default function Component() {
 
     const templateConfig = {
       name: templateName,
+      description: templateDescription,
       columns: sendColumns,
       lines,
     };
@@ -286,17 +287,17 @@ export default function Component() {
   }
 
   return (
-    <div>
+    <div className="w-full">
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto">
           <Card>
             <CardHeader>
               <CardTitle>A4 Invoice Manager</CardTitle>
               <CardDescription>Preview and manage A4-sized invoice</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2">
-                <div className="order-2 lg:order-1 bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="order-2 lg:order-1 bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
                   <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: '50px 30px', overflow: 'hidden', gap: 14 }}>
                     <div className="font-bold" style={{ fontSize: 20, padding: '0 10px' }}>Invoice</div>
                     {firstLines.map((num) => (
@@ -345,6 +346,13 @@ export default function Component() {
                       <Input
                         value={templateName}
                         onChange={e => setTemplateName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <Label>Template Description</Label>
+                      <Textarea
+                        value={templateDescription}
+                        onChange={e => setTemplateDescription(e.target.value)}
                       />
                     </div>
                     <div className="space-y-4">
@@ -449,7 +457,6 @@ export default function Component() {
                         Add Column
                       </Button>
                     </div>
-
                     <Button onClick={saveTemplate}>Submit</Button>
                   </div>
                 </div>

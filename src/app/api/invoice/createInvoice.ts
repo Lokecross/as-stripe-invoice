@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
+import { v4 as uuidv4 } from 'uuid';
+import clientPromise from "@/lib/mongodb";
 
 const GAP = 20;
 const MARGIN = 50;
@@ -39,10 +41,10 @@ interface Invoice {
   };
 }
 
-const helveticaPath = path.join(__dirname, "..", "..", "..", "..", "..", "/public/fonts/Helvetica.ttf");
-const helveticaBoldPath = path.join(__dirname, "..", "..", "..", "..", "..", "/public/fonts/Helvetica-Bold.ttf");
+const helveticaPath = path.join(process.cwd(), "public/fonts/Helvetica.ttf");
+const helveticaBoldPath = path.join(process.cwd(), "public/fonts/Helvetica-Bold.ttf");
 
-function createInvoice(invoice: Invoice, path: string): void {
+async function createInvoice(invoice: Invoice): Promise<string> {
   invoice = {
     ...invoice,
     items: {
@@ -61,13 +63,29 @@ function createInvoice(invoice: Invoice, path: string): void {
     }
   }
 
-  const doc = new PDFDocument({ size: "A4", margin: MARGIN, font: helveticaPath,  });
+  const fileName = `invoice_${uuidv4()}.pdf`;
+  const filePath = path.join(process.cwd(), 'public', 'invoices', fileName);
+
+  const doc = new PDFDocument({ size: "A4", margin: MARGIN, font: helveticaPath });
 
   const y = generateHeader(doc);
   generateLine(doc, invoice, 0, y);
 
   doc.end();
-  doc.pipe(fs.createWriteStream(path));
+  doc.pipe(fs.createWriteStream(filePath));
+
+  // Store invoice details in the database
+  const client = await clientPromise;
+  const db = client.db("stripe-invoicing");
+  const invoiceCollection = db.collection("invoices");
+
+  await invoiceCollection.insertOne({
+    fileName,
+    createdAt: new Date(),
+    invoice
+  });
+
+  return fileName;
 }
 
 function generateLine(doc: PDFKit.PDFDocument, invoice: Invoice, idx: number, y: number): number {

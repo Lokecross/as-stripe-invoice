@@ -296,50 +296,50 @@ export default function Component() {
               <CardDescription>Preview and manage A4-sized invoice</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="order-2 lg:order-1 bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
-                  <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: '50px 30px', overflow: 'hidden', gap: 14 }}>
-                    <div className="font-bold" style={{ fontSize: 20, padding: '0 10px' }}>Invoice</div>
-                    {firstLines.map((num) => (
-                      <div key={num} className="flex justify-between">
-                        <Droppable num={(num - 1)*2 + 1} addNew={addNew}>
-                          {componentMap(droppableContent[(num - 1)*2 + 1])}
-                        </Droppable>
-                        <Droppable num={(num - 1)*2 + 2} addNew={addNew}>
-                          {componentMap(droppableContent[(num - 1)*2 + 2])}
-                        </Droppable>
+              <div style={{ display: 'flex', gap: 20 }}>
+                <div className=" bg-white border rounded-lg overflow-hidden shadow-inner" style={{ minWidth: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
+                    <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: '50px 30px', overflow: 'hidden', gap: 14 }}>
+                      <div className="font-bold" style={{ fontSize: 20, padding: '0 10px' }}>Invoice</div>
+                      {firstLines.map((num) => (
+                        <div key={num} className="flex justify-between">
+                          <Droppable num={(num - 1)*2 + 1} addNew={addNew}>
+                            {componentMap(droppableContent[(num - 1)*2 + 1])}
+                          </Droppable>
+                          <Droppable num={(num - 1)*2 + 2} addNew={addNew}>
+                            {componentMap(droppableContent[(num - 1)*2 + 2])}
+                          </Droppable>
+                        </div>
+                      ))}
+                      <Button size="icon" variant="outline" className='size-8' onClick={() => {
+                        setDropLines(dropLines + 1);
+                        setTableLine(tableLine + 1);
+                      }}>
+                        <ListPlusIcon className="h-4 w-4"/>
+                      </Button>
+                      <div className="">
+                        <Table columns={columns.toReversed()} />
                       </div>
-                    ))}
-                    <Button size="icon" variant="outline" className='size-8' onClick={() => {
-                      setDropLines(dropLines + 1);
-                      setTableLine(tableLine + 1);
-                    }}>
-                      <ListPlusIcon className="h-4 w-4"/>
-                    </Button>
-                    <div className="">
-                      <Table columns={columns.toReversed()} />
-                    </div>
-                    <div className="flex justify-end">
-                      <Total />
-                    </div>
-                    {lastLines.map((num) => (
-                      <div key={num} className="flex justify-between">
-                        <Droppable num={(num - 1)*2 + 1} addNew={addNew}>
-                          {componentMap(droppableContent[(num - 1)*2 + 1])}
-                        </Droppable>
-                        <Droppable num={(num - 1)*2 + 2} addNew={addNew}>
-                          {componentMap(droppableContent[(num - 1)*2 + 2])}
-                        </Droppable>
+                      <div className="flex justify-end">
+                        <Total />
                       </div>
-                    ))}
-                    <Button size="icon" variant="outline" className='size-8' onClick={() => {
-                      setDropLines(dropLines + 1);
-                    }}>
-                      <ListPlusIcon className="h-4 w-4"/>
-                    </Button>
-                  </div>
+                      {lastLines.map((num) => (
+                        <div key={num} className="flex justify-between">
+                          <Droppable num={(num - 1)*2 + 1} addNew={addNew}>
+                            {componentMap(droppableContent[(num - 1)*2 + 1])}
+                          </Droppable>
+                          <Droppable num={(num - 1)*2 + 2} addNew={addNew}>
+                            {componentMap(droppableContent[(num - 1)*2 + 2])}
+                          </Droppable>
+                        </div>
+                      ))}
+                      <Button size="icon" variant="outline" className='size-8' onClick={() => {
+                        setDropLines(dropLines + 1);
+                      }}>
+                        <ListPlusIcon className="h-4 w-4"/>
+                      </Button>
+                    </div>
                 </div>
-                <div className="order-1 lg:order-2">
+                <div style={{ flex: 1 }}>
                   <div className="space-y-8">
                     <div className="space-y-4">
                       <Label>Template Name</Label>

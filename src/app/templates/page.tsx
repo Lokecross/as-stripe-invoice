@@ -89,14 +89,6 @@ export default function InvoiceTemplates() {
             </div>
         </CardHeader>
         <CardContent>
-            <div className="mb-6">
-                <Input
-                    placeholder="Search templates..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="max-w-sm"
-                />
-            </div>
             <Table>
                 <TableHeader>
                 <TableRow>
@@ -111,21 +103,9 @@ export default function InvoiceTemplates() {
                     <TableCell className="font-medium">{template.name}</TableCell>
                     <TableCell>{template.description}</TableCell>
                     <TableCell className="text-right">
-                        <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontalIcon className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleDelete(template._id)} className="text-red-600">
-                            <TrashIcon className="mr-2 h-4 w-4" />
-                            Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                        </DropdownMenu>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(template._id)}>
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                     </TableRow>
                 ))}

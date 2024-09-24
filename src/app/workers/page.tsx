@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -85,7 +85,7 @@ export default function WorkersPage() {
                 <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -93,9 +93,9 @@ export default function WorkersPage() {
                     <TableRow key={worker._id}>
                     <TableCell>{worker.name}</TableCell>
                     <TableCell>{worker.email}</TableCell>
-                    <TableCell>
-                        <Button variant="destructive" onClick={() => deleteWorker(worker._id)}>
-                        Delete
+                    <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" onClick={() => deleteWorker(worker._id)}>
+                            <TrashIcon className="h-4 w-4" />
                         </Button>
                     </TableCell>
                     </TableRow>

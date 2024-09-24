@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { FileTextIcon, LayoutListIcon, UserIcon } from 'lucide-react'
+import { FileTextIcon, LayoutListIcon, UserIcon, PlusCircleIcon } from 'lucide-react'
 
 export default function Sidebar() {
   const pathname = usePathname()

@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { FileTextIcon, LayoutListIcon } from 'lucide-react'
+import { FileTextIcon, LayoutListIcon, UserIcon } from 'lucide-react'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -27,6 +27,14 @@ export default function Sidebar() {
               >
                 <LayoutListIcon className="mr-2" />
                 Invoices
+              </Link>
+            </li>
+            <li>
+              <Link href="/workers" 
+                className={`flex items-center w-full p-2 rounded-lg ${pathname === '/workers' ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
+              >
+                <UserIcon className="mr-2" />
+                Workers
               </Link>
             </li>
           </ul>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/table"
 import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useToast } from "@/components/ui/use-toast"
 
 const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='14' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Logo%3C/text%3E%3C/svg%3E"
 
@@ -20,6 +22,8 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
   const [agency, setAgency] = useState<any>(null)
   const [workers, setWorkers] = useState<any[]>([])
   const [invoices, setInvoices] = useState<any[]>([])
+  const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchAgencyData = async () => {
@@ -42,6 +46,57 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
 
     fetchAgencyData()
   }, [params.agencyId])
+
+  const handleWorkerSelection = (workerId: string) => {
+    setSelectedWorkers(prev =>
+      prev.includes(workerId)
+        ? prev.filter(id => id !== workerId)
+        : [...prev, workerId]
+    )
+  }
+
+  const handleGenerateInvoices = async () => {
+    if (selectedWorkers.length === 0) {
+      toast({
+        title: "No workers selected",
+        description: "Please select at least one worker to generate invoices.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/agencies/${params.agencyId}/invoices`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ workerIds: selectedWorkers }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Invoices generated",
+          description: `Successfully generated invoices for ${selectedWorkers.length} worker(s).`,
+        })
+        // Refresh the invoices list
+        const invoicesResponse = await fetch(`/api/agencies/${params.agencyId}/invoices`)
+        const invoicesData = await invoicesResponse.json()
+        setInvoices(invoicesData)
+        // Clear selection
+        setSelectedWorkers([])
+      } else {
+        throw new Error('Failed to generate invoices')
+      }
+    } catch (error) {
+      console.error('Error generating invoices:', error)
+      toast({
+        title: "Error",
+        description: "Failed to generate invoices. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
 
   if (!agency) {
     return <div>Loading...</div>
@@ -74,8 +129,15 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
         {/* Workers List Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Workers</CardTitle>
-            <CardDescription>List of agency workers</CardDescription>
+            <div className='flex justify-between'>
+              <div>
+                <CardTitle>Workers</CardTitle>
+                <CardDescription>List of agency workers</CardDescription>
+              </div>
+              <Button variant="secondary" onClick={handleGenerateInvoices} disabled={selectedWorkers.length === 0}>
+                Generate Invoices
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -87,8 +149,14 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
               </TableHeader>
               <TableBody>
                 {workers.map((worker) => (
-                  <TableRow key={worker.id}>
-                    <TableCell className="font-medium">{worker.name}</TableCell>
+                  <TableRow key={worker._id}>
+                    <TableCell className='flex items-center gap-3'>
+                      <Checkbox
+                        checked={selectedWorkers.includes(worker._id)}
+                        onCheckedChange={() => handleWorkerSelection(worker._id)}
+                      />
+                      {worker.name}
+                    </TableCell>
                     <TableCell>{worker.email}</TableCell>
                   </TableRow>
                 ))}
@@ -123,7 +191,7 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
                         invoice.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        Overdue
+                        {invoice.status}
                       </span>
                     </TableCell>
                   </TableRow>

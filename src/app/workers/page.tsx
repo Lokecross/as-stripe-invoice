@@ -18,7 +18,9 @@ interface Worker {
   _id: string;
   name: string;
   email: string;
-  agency: string;
+  agency: {
+    name: string;
+  };
 }
 
 export default function WorkersPage() {
@@ -66,7 +68,7 @@ export default function WorkersPage() {
               <TableRow key={worker._id}>
                 <TableCell>{worker.name}</TableCell>
                 <TableCell>{worker.email}</TableCell>
-                <TableCell>{worker.agency ? worker.agency : 'N/A'}</TableCell>
+                <TableCell>{worker.agency ? worker.agency.name : 'N/A'}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => deleteWorker(worker._id)}>
                     <TrashIcon className="h-4 w-4" />

@@ -6,7 +6,22 @@ export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db("stripe-invoicing");
-    const workers = await db.collection("workers").find({}).toArray();
+    const workers = await db.collection("workers").aggregate([
+        {
+          $lookup: {
+            from: "agencies",
+            localField: "agency",
+            foreignField: "_id",
+            as: "agency"
+          }
+        },
+        {
+          $unwind: {
+            path: "$agency",
+            preserveNullAndEmptyArrays: true
+          }
+        }
+      ]).toArray();
     return NextResponse.json(workers);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch workers" }, { status: 500 });
@@ -15,10 +30,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email } = await request.json();
+    const { name, email, agency } = await request.json();
     const client = await clientPromise;
     const db = client.db("stripe-invoicing");
-    const result = await db.collection("workers").insertOne({ name, email });
+    const result = await db.collection("workers").insertOne({ name, email, agency: new ObjectId(agency) });
     return NextResponse.json({ id: result.insertedId }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to create worker" }, { status: 500 });

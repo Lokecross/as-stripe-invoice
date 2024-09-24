@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb'
 export async function GET() {
   try {
     const client = await clientPromise
-    const db = client.db()
+    const db = client.db("stripe-invoicing")
     const agencies = await db.collection('agencies').find({}).toArray()
     return NextResponse.json(agencies)
   } catch (error) {
@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const client = await clientPromise
-    const db = client.db()
+    const db = client.db("stripe-invoicing")
     const formData = await request.formData()
     const name = formData.get('name')
     const logo = formData.get('logo')
@@ -47,7 +47,7 @@ async function saveLogoAndGetUrl(logo: File): Promise<string> {
 export async function DELETE(request: Request) {
   try {
     const client = await clientPromise
-    const db = client.db()
+    const db = client.db("stripe-invoicing")
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 

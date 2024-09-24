@@ -48,6 +48,12 @@ interface TransformedLine {
   line: number;
 }
 
+interface Worker {
+  _id: string;
+  name: string;
+  email: string;
+}
+
 function transformTemplate(template: ITemplate): TransformedLine[] {
   const transformedLines: TransformedLine[] = [];
 
@@ -164,14 +170,20 @@ export default function Component() {
   const [templates, setTemplates] = useState<ITemplate[] | null>(null)
   const [templateIndex, setTemplateIndex] = useState<number | "none">("none")
   const [lines, setLines] = useState<TransformedLine[]>([])
+  const [workers, setWorkers] = useState<Worker[]>([])
+  const [selectedWorker, setSelectedWorker] = useState<string | null>(null)
  
   useEffect(() => {
-    async function fetchPosts() {
-      let res = await fetch('/api/template')
-      let data = await res.json()
-      setTemplates(data.templates)
+    async function fetchData() {
+      let templatesRes = await fetch('/api/template')
+      let templatesData = await templatesRes.json()
+      setTemplates(templatesData.templates)
+
+      let workersRes = await fetch('/api/worker')
+      let workersData = await workersRes.json()
+      setWorkers(workersData)
     }
-    fetchPosts()
+    fetchData()
   }, [])
 
   const [rows, setRows] = useState<IRow[]>([
@@ -267,6 +279,7 @@ export default function Component() {
         }),
       },
       invoiceNr: 123,
+      workerId: selectedWorker,
     };
 
     fetch('/api/invoice', {
@@ -322,6 +335,19 @@ export default function Component() {
             <div>
                 <div className="space-y-4 mb-4">
                   <div className="space-y-4 mb-4">
+                    <div>
+                      <Label>Select Worker</Label>
+                      <Select value={selectedWorker || ""} onValueChange={setSelectedWorker}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a worker" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {workers.map((worker) => (
+                            <SelectItem key={worker._id} value={worker._id}>{worker.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     {lines.map((line, idx) => (
                       <div key={idx}>
                         <Label>{line.title}</Label>

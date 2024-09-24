@@ -34,6 +34,14 @@ function setUndefinedForValue(obj: { [x: number]: number | undefined }, targetVa
   return result;
 }
 
+interface IItem {
+  internalId: number;
+  title: string;
+  field: string;
+  type: 'vertical' | 'horizontal';
+  keyValues?: { key: string; value: string }[];
+}
+
 function TableTextPlaceHolder() {
   return (
     <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
@@ -100,8 +108,20 @@ function BlockText(props: { item: IItem }) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>{props.item.title}:</div>
-      <TextPlaceHolder field={props.item.field} />
+      {props.item.type === 'vertical' ? (
+        <>
+          <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>{props.item.title}:</div>
+          <TextPlaceHolder field={props.item.field} />
+        </>
+      ) : (
+        <div>
+          {props.item.keyValues?.map((kv, index) => (
+            <div key={index} style={{ fontSize: 10, lineHeight: '14px' }}>
+              <b>{kv.key}:</b> [{kv.value}]
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -241,7 +261,9 @@ export default function Component() {
   const handleDataTypeSelection = (type: 'vertical' | 'horizontal') => {
     if (currentDropId !== null) {
       const newInternalId = Math.max(...(blocks.map(item => item.internalId))) + 1;
-      const newBlock = { internalId: newInternalId, title: 'New Block', field: workerFields[0], type };
+      const newBlock: IItem = type === 'vertical'
+        ? { internalId: newInternalId, title: 'New Block', field: workerFields[0], type }
+        : { internalId: newInternalId, title: 'New Block', field: '', type, keyValues: [{ key: 'New Key', value: workerFields[0] }] };
       
       setBlocks(prevBlocks => [...prevBlocks, newBlock]);
       setDroppableContent(prevContent => ({
@@ -370,9 +392,9 @@ export default function Component() {
                       </Button>
                     </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div className="space-y-8">
-                  <div className="space-y-4">
+              <div style={{ flex: 1 }}>
+                <div className="space-y-8">
+                    <div className="space-y-4">
                       <Label>Template Name</Label>
                       <Input
                         value={templateName}
@@ -386,68 +408,155 @@ export default function Component() {
                         onChange={e => setTemplateDescription(e.target.value)}
                       />
                     </div>
-                    <div className="space-y-4">
-                      <Label>Text</Label>
-                      {blocks.map((item, index) => (
-                        <div key={item.internalId} className="flex items-center space-x-2">
-                          <Input
-                            placeholder="String"
-                            value={item.title}
-                            disabled={index < 3}
-                            onChange={e => {
-                              const newValue = e.target.value;
-                              const newBlocks = blocks.map(it => {
-                                if (it.internalId === item.internalId) {
-                                  return { ...it, title: newValue };
-                                }
-                                return it;
-                              });
-                              setBlocks(newBlocks);
-                            }}
-                          />
-                          <Select
-                            value={item.field}
-                            disabled={index < 3}
-                            onValueChange={(value) => {
-                              const newBlocks = blocks.map(it => {
-                                if (it.internalId === item.internalId) {
-                                  return { ...it, field: value };
-                                }
-                                return it;
-                              });
-                              setBlocks(newBlocks);
-                            }}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select a field" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {workerFields.map((field) => (
-                                <SelectItem key={field} value={field}>
-                                  {field}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            disabled={index < 3}
-                            onClick={() => {
-                              const newBlocks = blocks.filter(it => it.internalId !== item.internalId);
-                              setBlocks(newBlocks);
-                              const newDroppableContent = setUndefinedForValue(droppableContent, item.internalId);
-                              setDroppableContent(newDroppableContent);
-                            }}
-                            className="min-w-10"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                    <div>
+                  <div className="space-y-4">
+                    <Label>Text</Label>
+                    {blocks.map((item, index) => (
+                      <div key={item.internalId} className="space-y-2">
+                        {item.type === 'vertical' ? (
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              placeholder="String"
+                              value={item.title}
+                              disabled={index < 3}
+                              onChange={e => {
+                                const newValue = e.target.value;
+                                const newBlocks = blocks.map(it => {
+                                  if (it.internalId === item.internalId) {
+                                    return { ...it, title: newValue };
+                                  }
+                                  return it;
+                                });
+                                setBlocks(newBlocks);
+                              }}
+                            />
+                            <Select
+                              value={item.field}
+                              disabled={index < 3}
+                              onValueChange={(value) => {
+                                const newBlocks = blocks.map(it => {
+                                  if (it.internalId === item.internalId) {
+                                    return { ...it, field: value };
+                                  }
+                                  return it;
+                                });
+                                setBlocks(newBlocks);
+                              }}
+                            >
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a field" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {workerFields.map((field) => (
+                                  <SelectItem key={field} value={field}>
+                                    {field}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {item.keyValues?.map((kv, kvIndex) => (
+                              <div key={kvIndex} className="flex items-center space-x-2">
+                                <Input
+                                  placeholder="Key"
+                                  value={kv.key}
+                                  onChange={e => {
+                                    const newValue = e.target.value;
+                                    const newBlocks = blocks.map(it => {
+                                      if (it.internalId === item.internalId) {
+                                        const newKeyValues = [...(it.keyValues || [])];
+                                        newKeyValues[kvIndex] = { ...newKeyValues[kvIndex], key: newValue };
+                                        return { ...it, keyValues: newKeyValues };
+                                      }
+                                      return it;
+                                    });
+                                    setBlocks(newBlocks);
+                                  }}
+                                />
+                                <Select
+                                  value={kv.value}
+                                  onValueChange={(value) => {
+                                    const newBlocks = blocks.map(it => {
+                                      if (it.internalId === item.internalId) {
+                                        const newKeyValues = [...(it.keyValues || [])];
+                                        newKeyValues[kvIndex] = { ...newKeyValues[kvIndex], value };
+                                        return { ...it, keyValues: newKeyValues };
+                                      }
+                                      return it;
+                                    });
+                                    setBlocks(newBlocks);
+                                  }}
+                                >
+                                  <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select a field" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {workerFields.map((field) => (
+                                      <SelectItem key={field} value={field}>
+                                        {field}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    const newBlocks = blocks.map(it => {
+                                      if (it.internalId === item.internalId) {
+                                        const newKeyValues = (it.keyValues || []).filter((_, i) => i !== kvIndex);
+                                        return { ...it, keyValues: newKeyValues };
+                                      }
+                                      return it;
+                                    });
+                                    setBlocks(newBlocks);
+                                  }}
+                                  className="min-w-10"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newBlocks = blocks.map(it => {
+                                  if (it.internalId === item.internalId) {
+                                    const newKeyValues = [...(it.keyValues || []), { key: 'New Key', value: workerFields[0] }];
+                                    return { ...it, keyValues: newKeyValues };
+                                  }
+                                  return it;
+                                });
+                                setBlocks(newBlocks);
+                              }}
+                            >
+                              Add Key-Value Pair
+                            </Button>
+                          </div>
+                        )}
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          disabled={index < 3}
+                          onClick={() => {
+                            const newBlocks = blocks.filter(it => it.internalId !== item.internalId);
+                            setBlocks(newBlocks);
+                            const newDroppableContent = setUndefinedForValue(droppableContent, item.internalId);
+                            setDroppableContent(newDroppableContent);
+                          }}
+                          className="min-w-10"
+                        >
+                          <X className="h-4 w-4" /> Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
                       <Label>Columns</Label>
                       {columns.map((item, index) => (
                         <div key={item.internalId} className="flex items-center space-x-2 my-2">
@@ -513,8 +622,8 @@ export default function Component() {
                       </Button>
                     </div>
                     <Button onClick={saveTemplate}>Submit</Button>
+                    </div>
                   </div>
-                </div>
               </div>
             </CardContent>
           </Card>

@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PencilIcon } from 'lucide-react'
+import Link from 'next/link'
 
 const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='14' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Logo%3C/text%3E%3C/svg%3E"
 
@@ -42,11 +43,6 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
     fetchAgencyData()
   }, [params.agencyId])
 
-  const handleEditTemplate = () => {
-    console.log("Edit invoice template")
-    // Implement edit template functionality here
-  }
-
   if (!agency) {
     return <div>Loading...</div>
   }
@@ -66,10 +62,12 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" onClick={handleEditTemplate}>
-              <PencilIcon className="mr-2 h-4 w-4" />
-              Edit Invoice Template
-            </Button>
+            <Link href={`/agencies/${params.agencyId}/template`}>
+              <Button variant="outline">
+                <PencilIcon className="mr-2 h-4 w-4" />
+                Edit Invoice Template
+              </Button>
+            </Link>
           </CardFooter>
         </Card>
 

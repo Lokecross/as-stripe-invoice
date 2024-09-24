@@ -30,19 +30,19 @@ export default function Sidebar() {
               </Link>
             </li>
             <li>
-              <Link href="/workers" 
-                className={`flex items-center w-full p-2 rounded-lg ${pathname === '/workers' ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
-              >
-                <UserIcon className="mr-2" />
-                Workers
-              </Link>
-            </li>
-            <li>
               <Link href="/agencies" 
                 className={`flex items-center w-full p-2 rounded-lg ${pathname === '/agencies' ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
               >
                 <BuildingIcon className="mr-2" />
                 Agencies
+              </Link>
+            </li>
+            <li>
+              <Link href="/workers" 
+                className={`flex items-center w-full p-2 rounded-lg ${pathname === '/workers' ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
+              >
+                <UserIcon className="mr-2" />
+                Workers
               </Link>
             </li>
           </ul>

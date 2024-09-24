@@ -55,7 +55,7 @@ export default function InvoiceListingPage() {
         <div className="flex justify-between items-center mb-6">
             <CardTitle>Invoices</CardTitle>
             <Link href="/new-invoice">
-                <Button>
+                <Button variant="outline" size="sm" className="ml-2">
                     <PlusIcon className="mr-2 h-4 w-4" /> New Invoice
                 </Button>
             </Link>

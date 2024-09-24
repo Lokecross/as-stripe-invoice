@@ -7,38 +7,39 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { PlusIcon } from 'lucide-react'
 
-export function NewAgencyModal({ onAgencyAdded }: { onAgencyAdded: () => void }) {
+export function NewWorkerModal({ onWorkerAdded }: { onWorkerAdded: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
-  const [logo, setLogo] = useState<File | null>(null)
+  const [email, setEmail] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const formData = new FormData()
-    formData.append('name', name)
-    if (logo) formData.append('logo', logo)
-
-    const response = await fetch('/api/agencies', {
+    const response = await fetch('/api/worker', {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email }),
     })
 
     if (response.ok) {
       setIsOpen(false)
       setName('')
-      setLogo(null)
-      onAgencyAdded()
+      setEmail('')
+      onWorkerAdded()
     }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-2"><PlusIcon className="mr-2 h-4 w-4" /> New Agency</Button>
+        <Button variant="outline" size="sm" className="ml-2">
+          <PlusIcon className="mr-2 h-4 w-4" /> New Worker
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Agency</DialogTitle>
+          <DialogTitle>Create New Worker</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -54,19 +55,20 @@ export function NewAgencyModal({ onAgencyAdded }: { onAgencyAdded: () => void })
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="logo" className="text-right">
-                Logo
+              <Label htmlFor="email" className="text-right">
+                Email
               </Label>
               <Input
-                id="logo"
-                type="file"
-                onChange={(e) => setLogo(e.target.files?.[0] || null)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="col-span-3"
               />
             </div>
           </div>
           <div className="flex justify-end">
-            <Button type="submit">Create Agency</Button>
+            <Button type="submit">Create Worker</Button>
           </div>
         </form>
       </DialogContent>

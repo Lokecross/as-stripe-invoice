@@ -82,7 +82,7 @@ export default function InvoiceTemplates() {
             <div className="flex justify-between items-center mb-6">
                 <CardTitle>Invoice Templates</CardTitle>
                 <Link href="/new-template">
-                    <Button>
+                    <Button variant="outline" size="sm" className="ml-2">
                         <PlusIcon className="mr-2 h-4 w-4" /> New Template
                     </Button>
                 </Link>

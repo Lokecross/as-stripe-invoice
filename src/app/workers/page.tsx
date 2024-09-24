@@ -1,5 +1,6 @@
 "use client"
 
+import { NewWorkerModal } from "@/components/new-worker-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -60,26 +61,10 @@ export default function WorkersPage() {
         <CardHeader>
             <div className="flex justify-between items-center mb-6">
                 <CardTitle>Workers</CardTitle>
+                <NewWorkerModal onWorkerAdded={fetchWorkers} />
             </div>
         </CardHeader>
         <CardContent>
-            <div className="mb-5">
-                <input
-                type="text"
-                placeholder="Name"
-                value={newWorker.name}
-                onChange={(e) => setNewWorker({ ...newWorker, name: e.target.value })}
-                className="mr-2 p-2 border rounded"
-                />
-                <input
-                type="email"
-                placeholder="Email"
-                value={newWorker.email}
-                onChange={(e) => setNewWorker({ ...newWorker, email: e.target.value })}
-                className="mr-2 p-2 border rounded"
-                />
-                <Button onClick={createWorker}>Add Worker</Button>
-            </div>
             <Table>
                 <TableHeader>
                 <TableRow>

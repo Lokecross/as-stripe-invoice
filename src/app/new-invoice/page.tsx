@@ -193,6 +193,7 @@ export default function Component() {
     <div className="w-full flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
+          <Label>Choose a template</Label>
           <Select value={(templateIndex || 0)?.toString()} onValueChange={(newValue) => {
             setTemplateIndex(Number(newValue));
             setLines(transformTemplate(templates[Number(newValue)]));
@@ -287,9 +288,9 @@ export default function Component() {
           <CardDescription>Preview and manage A4-sized invoice</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="order-2 lg:order-1">
-                <div className="bg-white border rounded-lg overflow-hidden shadow-inner" style={{ width: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <div>
+                <div className="bg-white border rounded-lg overflow-hidden shadow-inner" style={{ minWidth: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
                   <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: 50, overflow: 'hidden', gap: 20 }}>
                     <div className="font-bold" style={{ fontSize: 20 }}>Invoice</div>
                     {template.lines.map((line, index) => {
@@ -317,7 +318,7 @@ export default function Component() {
                   </div>
                 </div>
             </div>
-            <div className="order-1 lg:order-2">
+            <div style={{ flex: 1 }}>
             <div>
                 <div className="space-y-4 mb-4">
                   <div className="space-y-4 mb-4">

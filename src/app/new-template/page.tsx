@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 function splitArray(arr: number[], n: number): [number[], number[]] {
   const firstPart = arr.slice(0, n - 1);
@@ -40,10 +41,12 @@ function TableTextPlaceHolder() {
   )
 }
 
-function TextPlaceHolder() {
+function TextPlaceHolder({ field }: { field: string }) {
   return (
     <div style={{ height: 14, display: 'flex', alignItems: 'center' }}>
-      <div style={{ height: 8, width: 150, borderRadius: 4, background: '#eee' }} />
+      <div style={{ height: 8, fontSize: 10, lineHeight: '9px' }}>
+        [{field}]
+      </div>
     </div>
   )
 }
@@ -97,9 +100,7 @@ function BlockText(props: { item: IItem }) {
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <div className="font-bold" style={{ fontSize: 10, lineHeight: '14px' }}>{props.item.title}:</div>
-      {Array(props.item.lines).fill(0).map((_, idx) => (
-        <TextPlaceHolder key={idx} />
-      ))}
+      <TextPlaceHolder field={props.item.field} />
     </div>
   )
 }
@@ -121,14 +122,14 @@ function Table(props: { columns: IColumn[] }) {
           <tr style={{ height: 26, borderBottom: '1px solid #e5e7eb' }}>
             <td className="text-left" style={{ fontSize: 10, lineHeight: '14px' }}>Widget A</td>
             {props.columns.map(column => (
-              <td key={column.internalId} className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}><TableTextPlaceHolder /></td>
+              <td key={column.internalId} className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>[{column.data}]</td>
             ))}
             <td className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>$20.00</td>
           </tr>
           <tr style={{ height: 26, borderBottom: '1px solid #e5e7eb' }}>
             <td className="text-left" style={{ fontSize: 10, lineHeight: '14px' }}>Widget B</td>
             {props.columns.map(column => (
-              <td key={column.internalId} className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}><TableTextPlaceHolder /></td>
+              <td key={column.internalId} className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>[{column.data}]</td>
             ))}
             <td className="text-right" style={{ fontSize: 10, lineHeight: '14px' }}>$15.00</td>
           </tr>
@@ -167,13 +168,30 @@ function Total() {
 interface IItem {
   internalId: number;
   title: string;
-  lines: number;
+  field: string;
 }
 
 interface IColumn {
   internalId: number;
   title: string;
+  data: string;
 }
+
+const workerFields = [
+  "worker.name",
+  "worker.email",
+  "worker.phone",
+  "worker.address",
+  "worker.age",
+  "invoice.id",
+  "invoice.date",
+];
+
+const columnDataOptions = [
+  "REG hours",
+  "OT hours",
+  "Total hours"
+];
 
 export default function Component() {
   const [dropLines, setDropLines] = useState(3);
@@ -185,14 +203,14 @@ export default function Component() {
   const [firstLines, lastLines] = splitArray(droppables, tableLine);
 
   const [blocks, setBlocks] = useState<IItem[]>([
-    { internalId: 1, title: 'Invoice Number', lines: 1 },
-    { internalId: 2, title: 'Invoice Date', lines: 1 },
-    { internalId: 3, title: 'Bill To', lines: 3 },
+    { internalId: 1, title: 'Invoice Number', field: 'invoice.id' },
+    { internalId: 2, title: 'Invoice Date', field: 'invoice.date' },
+    { internalId: 3, title: 'Bill To', field: 'worker.name' },
   ]);
 
   const [columns, setColumns] = useState<IColumn[]>([
-    { internalId: 1, title: 'Price' },
-    { internalId: 2, title: 'Quantity' },
+    { internalId: 1, title: 'REG Hours', data: 'REG hours' },
+    { internalId: 2, title: 'OT Hours', data: 'OT hours' },
   ]);
 
   const [droppableContent, setDroppableContent] = useState<{ [x: number]: number | undefined }>({
@@ -218,7 +236,7 @@ export default function Component() {
 
   const addNew = (dropId: number) => {
     const newInternalId = Math.max(...(blocks.map(item => item.internalId))) + 1;
-    const newBlock = { internalId: newInternalId, title: 'New Block', lines: 1 };
+    const newBlock = { internalId: newInternalId, title: 'New Block', field: workerFields[0] };
     
     setBlocks(prevBlocks => [...prevBlocks, newBlock]);
     setDroppableContent(prevContent => ({
@@ -229,9 +247,9 @@ export default function Component() {
 
   const addNewColumn = () => {
     const newInternalId = Math.max(...(columns.map(clm => clm.internalId))) + 1;
-    const newBlock = { internalId: newInternalId, title: 'New Column' };
+    const newColumn = { internalId: newInternalId, title: 'New Column', data: columnDataOptions[0] };
     
-    setColumns(prevColumns => [...prevColumns, newBlock]);
+    setColumns(prevColumns => [...prevColumns, newColumn]);
   };
 
   const componentMap = (itemId: number | undefined) => {
@@ -297,7 +315,7 @@ export default function Component() {
             </CardHeader>
             <CardContent>
               <div style={{ display: 'flex', gap: 20 }}>
-                <div className=" bg-white border rounded-lg overflow-hidden shadow-inner" style={{ minWidth: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
+              <div className=" bg-white border rounded-lg overflow-hidden shadow-inner" style={{ minWidth: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
                     <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: '50px 30px', overflow: 'hidden', gap: 14 }}>
                       <div className="font-bold" style={{ fontSize: 20, padding: '0 10px' }}>Invoice</div>
                       {firstLines.map((num) => (
@@ -341,7 +359,7 @@ export default function Component() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div className="space-y-8">
-                    <div className="space-y-4">
+                  <div className="space-y-4">
                       <Label>Template Name</Label>
                       <Input
                         value={templateName}
@@ -369,31 +387,35 @@ export default function Component() {
                                 if (it.internalId === item.internalId) {
                                   return { ...it, title: newValue };
                                 }
-
                                 return it;
                               });
-
                               setBlocks(newBlocks);
                             }}
                           />
-                          <Input
-                            type="number"
-                            placeholder="Number"
-                            value={item.lines}
+                          <Select
+                            value={item.field}
                             disabled={index < 3}
-                            onChange={e => {
-                              const newValue = e.target.value;
+                            onValueChange={(value) => {
                               const newBlocks = blocks.map(it => {
                                 if (it.internalId === item.internalId) {
-                                  return { ...it, lines: Number(newValue) };
+                                  return { ...it, field: value };
                                 }
-
                                 return it;
                               });
-
                               setBlocks(newBlocks);
                             }}
-                          />
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Select a field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {workerFields.map((field) => (
+                                <SelectItem key={field} value={field}>
+                                  {field}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Button
                             type="button"
                             variant="ghost"
@@ -412,7 +434,6 @@ export default function Component() {
                         </div>
                       ))}
                     </div>
-
                     <div>
                       <Label>Columns</Label>
                       {columns.map((item, index) => (
@@ -426,13 +447,34 @@ export default function Component() {
                                 if (it.internalId === item.internalId) {
                                   return { ...it, title: newValue };
                                 }
-
                                 return it;
                               });
-
                               setColumns(newColumns);
                             }}
                           />
+                          <Select
+                            value={item.data}
+                            onValueChange={(value) => {
+                              const newColumns = columns.map(it => {
+                                if (it.internalId === item.internalId) {
+                                  return { ...it, data: value };
+                                }
+                                return it;
+                              });
+                              setColumns(newColumns);
+                            }}
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Select column data" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {columnDataOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Button
                             type="button"
                             variant="ghost"

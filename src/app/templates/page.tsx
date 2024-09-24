@@ -10,15 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { PlusIcon, MoreHorizontalIcon, TrashIcon } from 'lucide-react'
+import { PlusIcon, PencilIcon, TrashIcon } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -103,6 +96,11 @@ export default function InvoiceTemplates() {
                     <TableCell className="font-medium">{template.name}</TableCell>
                     <TableCell>{template.description}</TableCell>
                     <TableCell className="text-right">
+                      <Link href={`/edit-template?id=${template._id}`}>
+                        <Button variant="ghost" size="sm" className="mr-2">
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
+                      </Link>
                       <Button variant="ghost" size="sm" onClick={() => handleDelete(template._id)}>
                         <TrashIcon className="h-4 w-4" />
                       </Button>

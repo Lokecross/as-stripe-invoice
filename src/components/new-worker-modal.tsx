@@ -1,16 +1,44 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PlusIcon } from 'lucide-react'
+
+interface Agency {
+  _id: string;
+  name: string;
+}
 
 export function NewWorkerModal({ onWorkerAdded }: { onWorkerAdded: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [agencies, setAgencies] = useState<Agency[]>([])
+  const [selectedAgency, setSelectedAgency] = useState('')
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAgencies()
+    }
+  }, [isOpen])
+
+  const fetchAgencies = async () => {
+    try {
+      const response = await fetch('/api/agencies')
+      if (response.ok) {
+        const data = await response.json()
+        setAgencies(data)
+      } else {
+        console.error('Failed to fetch agencies')
+      }
+    } catch (error) {
+      console.error('Error fetching agencies:', error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,13 +47,14 @@ export function NewWorkerModal({ onWorkerAdded }: { onWorkerAdded: () => void })
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify({ name, email, agency: selectedAgency }),
     })
 
     if (response.ok) {
       setIsOpen(false)
       setName('')
       setEmail('')
+      setSelectedAgency('')
       onWorkerAdded()
     }
   }
@@ -65,6 +94,23 @@ export function NewWorkerModal({ onWorkerAdded }: { onWorkerAdded: () => void })
                 onChange={(e) => setEmail(e.target.value)}
                 className="col-span-3"
               />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="agency" className="text-right">
+                Agency
+              </Label>
+              <Select value={selectedAgency} onValueChange={setSelectedAgency}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select an agency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agencies.map((agency) => (
+                    <SelectItem key={agency._id} value={agency._id}>
+                      {agency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex justify-end">

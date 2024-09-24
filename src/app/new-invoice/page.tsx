@@ -52,7 +52,10 @@ interface Worker {
   _id: string;
   name: string;
   email: string;
+  // Add any additional fields here
 }
+
+const workerFields = ['worker._id', 'worker.name', 'worker.email', 'worker.age', 'worker.address', 'worker.workedHours']; // Add any additional fields here
 
 function transformTemplate(template: ITemplate): TransformedLine[] {
   const transformedLines: TransformedLine[] = [];
@@ -65,7 +68,7 @@ function transformTemplate(template: ITemplate): TransformedLine[] {
         internalId: line.left.internalId,
         title: line.left.title,
         lines: line.left.lines,
-        values: Array(line.left.lines).fill('Fill me'),
+        values: Array(line.left.lines).fill(''),
         line: index + 1,
       });
     }
@@ -77,7 +80,7 @@ function transformTemplate(template: ITemplate): TransformedLine[] {
         internalId: line.right.internalId,
         title: line.right.title,
         lines: line.right.lines,
-        values: Array(line.right.lines).fill('Fill me'),
+        values: Array(line.right.lines).fill(''),
         line: index + 1,
       });
     }
@@ -105,7 +108,6 @@ function BlockText(props: { item: TransformedLine }) {
     </div>
   )
 }
-
 
 function Table(props: { columns: string[], rows: IRow[] }) {
   return (
@@ -352,27 +354,36 @@ export default function Component() {
                       <div key={idx}>
                         <Label>{line.title}</Label>
                         {line.values.map((value, valueIdx) => (
-                          <Input
+                          <Select
                             key={valueIdx}
-                            placeholder="String"
-                            className="mt-1"
                             value={value}
-                            onChange={e => {
-                              const newValue = e.target.value;
+                            onValueChange={(newValue) => {
                               const newLines = lines.map((li, liIdx) => {
                                 if (idx === liIdx) {
-                                  return { ...li, values: li.values.map((va, vaIdx) => {
-                                    if (vaIdx === valueIdx) return newValue;
-                                    return va;
-                                  }) };
+                                  return {
+                                    ...li,
+                                    values: li.values.map((va, vaIdx) => {
+                                      if (vaIdx === valueIdx) return newValue;
+                                      return va;
+                                    })
+                                  };
                                 }
-
                                 return li;
                               });
-
                               setLines(newLines);
                             }}
-                          />
+                          >
+                            <SelectTrigger className="w-full mt-1">
+                              <SelectValue placeholder="Select a field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {workerFields.map((field) => (
+                                <SelectItem key={field} value={field}>
+                                  {field}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         ))}
                       </div>
                     ))}

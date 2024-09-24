@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 function splitArray(arr: number[], n: number): [number[], number[]] {
   const firstPart = arr.slice(0, n - 1);
@@ -169,6 +170,7 @@ interface IItem {
   internalId: number;
   title: string;
   field: string;
+  type: 'vertical' | 'horizontal';
 }
 
 interface IColumn {
@@ -198,14 +200,16 @@ export default function Component() {
   const [tableLine, setTableLine] = useState(3);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [currentDropId, setCurrentDropId] = useState<number | null>(null);
 
   const droppables = createSequentialArray(dropLines);
   const [firstLines, lastLines] = splitArray(droppables, tableLine);
 
   const [blocks, setBlocks] = useState<IItem[]>([
-    { internalId: 1, title: 'Invoice Number', field: 'invoice.id' },
-    { internalId: 2, title: 'Invoice Date', field: 'invoice.date' },
-    { internalId: 3, title: 'Bill To', field: 'worker.name' },
+    { internalId: 1, title: 'Invoice Number', field: 'invoice.id', type: 'vertical' },
+    { internalId: 2, title: 'Invoice Date', field: 'invoice.date', type: 'vertical' },
+    { internalId: 3, title: 'Bill To', field: 'worker.name', type: 'vertical' },
   ]);
 
   const [columns, setColumns] = useState<IColumn[]>([
@@ -234,15 +238,24 @@ export default function Component() {
     }
   };
 
+  const handleDataTypeSelection = (type: 'vertical' | 'horizontal') => {
+    if (currentDropId !== null) {
+      const newInternalId = Math.max(...(blocks.map(item => item.internalId))) + 1;
+      const newBlock = { internalId: newInternalId, title: 'New Block', field: workerFields[0], type };
+      
+      setBlocks(prevBlocks => [...prevBlocks, newBlock]);
+      setDroppableContent(prevContent => ({
+        ...prevContent,
+        [currentDropId]: newInternalId,
+      }));
+    }
+    setShowModal(false);
+    setCurrentDropId(null);
+  };
+
   const addNew = (dropId: number) => {
-    const newInternalId = Math.max(...(blocks.map(item => item.internalId))) + 1;
-    const newBlock = { internalId: newInternalId, title: 'New Block', field: workerFields[0] };
-    
-    setBlocks(prevBlocks => [...prevBlocks, newBlock]);
-    setDroppableContent(prevContent => ({
-      ...prevContent,
-      [dropId]: newInternalId,
-    }));
+    setCurrentDropId(dropId);
+    setShowModal(true);
   };
 
   const addNewColumn = () => {
@@ -314,7 +327,7 @@ export default function Component() {
               <CardDescription>Preview and manage A4-sized invoice</CardDescription>
             </CardHeader>
             <CardContent>
-              <div style={{ display: 'flex', gap: 20 }}>
+            <div style={{ display: 'flex', gap: 20 }}>
               <div className=" bg-white border rounded-lg overflow-hidden shadow-inner" style={{ minWidth: 595.28, minHeight: 841.89, overflow: 'hidden' }}>
                     <div className="w-full h-full overflow-auto text-sm flex flex-col" style={{ padding: '50px 30px', overflow: 'hidden', gap: 14 }}>
                       <div className="font-bold" style={{ fontSize: 20, padding: '0 10px' }}>Invoice</div>
@@ -507,6 +520,24 @@ export default function Component() {
           </Card>
         </div>
       </DndContext>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Data Type</DialogTitle>
+            <DialogDescription>
+              Choose the type of data for the new block
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-around mt-4">
+            <Button onClick={() => handleDataTypeSelection('vertical')}>
+              Vertical Key Value
+            </Button>
+            <Button onClick={() => handleDataTypeSelection('horizontal')}>
+              Horizontal Key Values
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

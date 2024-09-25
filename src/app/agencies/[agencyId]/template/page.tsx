@@ -162,8 +162,8 @@ function splitArray(arr: number[], n: number): [number[], number[]] {
     )
   }
   
-  function Total() {
-    const taxRate = 2;
+  function Total({ tax }: { tax: number }) {
+    const taxRate = tax;
     const subtotal = 35;
     const taxTotal = taxRate / 100 * subtotal;
     const total = subtotal + taxTotal;
@@ -212,16 +212,15 @@ function splitArray(arr: number[], n: number): [number[], number[]] {
   ];
   
   const columnDataOptions = [
-    "REG hours",
-    "OT hours",
-    "Total hours"
+    "worker.workedHours",
+    "worker.overdueHours",
+    "worker.totalHours"
   ];
 
 export default function EditTemplate() {
   const params = useParams();
   const searchParams = useSearchParams()
   const router = useRouter()
-  const templateId = searchParams.get('id')
   const { toast } = useToast()
 
   const [dropLines, setDropLines] = useState(3);
@@ -230,9 +229,11 @@ export default function EditTemplate() {
   const [currentDropId, setCurrentDropId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   const droppables = createSequentialArray(dropLines);
   const [firstLines, lastLines] = splitArray(droppables, tableLine);
+  
+  const [tax, setTax] = useState(0);
 
   const [blocks, setBlocks] = useState<IItem[]>([
     { internalId: 1, title: 'Invoice Number', field: 'invoice.id', type: 'vertical' },
@@ -241,8 +242,8 @@ export default function EditTemplate() {
   ]);
 
   const [columns, setColumns] = useState<IColumn[]>([
-    { internalId: 1, title: 'REG Hours', data: 'REG hours' },
-    { internalId: 2, title: 'OT Hours', data: 'OT hours' },
+    { internalId: 1, title: 'REG Hours', data: 'worker.workedHours' },
+    { internalId: 2, title: 'OT Hours', data: 'worker.overdueHours' },
   ]);
 
   const [droppableContent, setDroppableContent] = useState<{ [x: number]: number | undefined }>({
@@ -265,10 +266,12 @@ export default function EditTemplate() {
       if (response.ok) {
         const templateData = await response.json();
         if (templateData) {
-          setColumns(templateData.columns.map((col: string, index: number) => ({
+          setTax(templateData.tax || 0);
+
+          setColumns(templateData.columns.map((col: IColumn, index: number) => ({
             internalId: index + 1,
-            title: col,
-            data: col
+            title: col.title,
+            data: col.data,
           })));
           
           const newBlocks: IItem[] = [];
@@ -363,7 +366,7 @@ export default function EditTemplate() {
   };
 
   const saveTemplate = async () => {
-    const sendColumns = columns.toReversed().map(column => column.title);
+    const sendColumns = columns.toReversed();
     const beforeTableLines = firstLines.map(line => {
       const leftNum = droppableContent[(line - 1)*2 + 1];
       const rightNum = droppableContent[(line - 1)*2 + 2];
@@ -396,6 +399,7 @@ export default function EditTemplate() {
     const templateConfig = {
       columns: sendColumns,
       lines,
+      tax,
     };
 
     try {
@@ -475,7 +479,7 @@ export default function EditTemplate() {
                         <Table columns={columns.toReversed()} />
                       </div>
                       <div className="flex justify-end">
-                        <Total />
+                        <Total tax={tax} />
                       </div>
                       {lastLines.map((num) => (
                         <div key={num} className="flex justify-between">
@@ -708,6 +712,18 @@ export default function EditTemplate() {
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Add Column
                       </Button>
+                    </div>
+                    <div>
+                      <Label>Tax (%)</Label>
+                      <Input
+                        placeholder="Number"
+                        type="number"
+                        value={tax}
+                        onChange={e => {
+                          setTax(Number(e.target.value));
+                        }}
+                        className="mt-2"
+                      />
                     </div>
                     <Button onClick={saveTemplate}>Save</Button>
                     </div>

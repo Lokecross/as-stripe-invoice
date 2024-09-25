@@ -3,7 +3,7 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import { v4 as uuidv4 } from 'uuid';
 import clientPromise from "@/lib/mongodb";
-import { ITemplate, BlockProps, BlockValue } from "../agencies/[agencyId]/template/route";
+import { ITemplate, BlockProps, BlockValue, IColumn } from "../agencies/[agencyId]/template/route";
 import {
   generateHeader,
   generateHr,
@@ -26,7 +26,8 @@ interface Worker {
   age: number;
   address: string;
   workedHours: number;
-  hourlyRate?: number;
+  overdueHours: number;
+  hourlyRate: number;
 }
 
 interface Agency {
@@ -64,7 +65,7 @@ async function generateInvoice(template: ITemplate, worker: Worker, agency: Agen
 
         y = Math.max(yLeft, yRight);
       } else if (line.type === 'items') {
-        y = generateItemsTable(doc, template.columns, worker, y);
+        y = generateItemsTable(doc, template, template.columns, worker, y);
       }
 
       y += GAP;
@@ -171,36 +172,38 @@ function getBlockValue(field: BlockValue, data: { worker: Worker; agency: Agency
   }
 }
 
-function generateItemsTable(doc: PDFKit.PDFDocument, columns: string[], worker: Worker, y: number): number {
+function generateItemsTable(doc: PDFKit.PDFDocument, template: ITemplate, columns: IColumn[], worker: Worker, y: number): number {
   const tableTop = y;
 
+  const newColumns = ['Item', ...columns.map(item => item.title), 'Total']
+
   // Generate header
-  generateTableRow(doc, y, columns, columns, true);
+  generateTableRow(doc, y, newColumns, newColumns, true);
 
   y += 20;
   generateHr(doc, y);
   y += 10;
 
   // Generate row
-  const hourlyRate = worker.hourlyRate || 50; // Default to $50 if not provided
+  const hourlyRate = worker.hourlyRate;
   const amount = worker.workedHours * hourlyRate;
 
-  const rowData = columns.map(column => {
-    switch (column.toLowerCase()) {
-      case 'description':
-        return 'Work hours';
-      case 'quantity':
-        return worker.workedHours.toString();
-      case 'rate':
-        return formatCurrency(hourlyRate * 100); // Convert to cents for formatCurrency
-      case 'amount':
-        return formatCurrency(amount * 100); // Convert to cents for formatCurrency
+  const extraRowData = columns.map(column => {
+    switch (column.data) {
+      case 'worker.workedHours':
+        return `${worker.workedHours.toString()}h` // Convert to cents for formatCurrency
+      case 'worker.overdueHours':
+        return `${worker.overdueHours.toString()}h`
+      case 'worker.totalHours':
+        return `${(worker.overdueHours + worker.workedHours).toString()}h`
       default:
         return '';
     }
   });
 
-  generateTableRow(doc, y, columns, rowData);
+  const rowData = ['Firefighter', ...extraRowData, formatCurrency(amount * 100)]
+
+  generateTableRow(doc, y, newColumns, rowData);
 
   y += 20;
   generateHr(doc, y);
@@ -208,11 +211,29 @@ function generateItemsTable(doc: PDFKit.PDFDocument, columns: string[], worker: 
 
   // Generate total
   const { total } = calculateInvoiceTotal(amount * 100, 0); // Assuming no tax, convert to cents
+
+  const taxAmount = template.tax / 100 * total;
+
+  doc.font(helveticaBoldPath).fontSize(10);
+  doc.text('Subtotal:', 430, y);
+  doc.font(helveticaPath).fontSize(10);
+  doc.text(formatCurrency(total), MARGIN, y, { align: 'right' });
+
+  y+=15;
+
+  doc.font(helveticaBoldPath).fontSize(10);
+  doc.text(`Tax (${template.tax}%):`, 430, y);
+  doc.font(helveticaPath).fontSize(10);
+  doc.text(formatCurrency(taxAmount), MARGIN, y, { align: 'right' });
+
+  y+=15;
+
   doc.font(helveticaBoldPath).fontSize(10);
   doc.text('Total:', 430, y);
-  doc.text(formatCurrency(total), doc.page.width - MARGIN, y, { align: 'right' });
+  doc.font(helveticaPath).fontSize(10);
+  doc.text(formatCurrency(total + taxAmount), MARGIN, y, { align: 'right' });
 
-  return y + 20;
+  return y + GAP;
 }
 
 export { generateInvoice };

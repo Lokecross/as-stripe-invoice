@@ -13,6 +13,11 @@ export type BlockValue =
     | "invoice.date"
     | "agency.name";
 
+export type ColumnValue = 
+    | "worker.workedHours"
+    | "worker.overdueHours"
+    | "worker.totalHours"
+
 export type BlockProps = {
     internalId: number;
     title: string;
@@ -24,15 +29,22 @@ export type BlockProps = {
     keyValues: Array<{ key: string; value: BlockValue }>;
 }
 
+export interface IColumn {
+    internalId: number;
+    title: string;
+    data: ColumnValue;
+}
+
 export interface ITemplate {
     name: string;
     description: string;
-    columns: string[];
+    columns: IColumn[];
     lines: Array<{
         type: 'text' | 'items';
         left?: BlockProps;
         right?: BlockProps;
     }>;
+    tax: number;
 }
 
 export const POST = async (req: Request) => {

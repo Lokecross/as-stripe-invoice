@@ -110,7 +110,8 @@ export async function POST(
             age: worker.age,
             address: worker.address,
             workedHours: worker.workedHours || 0,
-            hourlyRate: worker.hourlyRate,
+            hourlyRate: worker.hourlyRate || 20,
+            overdueHours: worker.overdueHours || 0,
           },
           { name: agency.name },
           invoiceData

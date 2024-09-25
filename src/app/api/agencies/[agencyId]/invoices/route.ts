@@ -3,6 +3,7 @@ import clientPromise from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 import { generateInvoice } from '@/app/api/invoice/generateInvoice'
 import { ITemplate } from '../template/route'
+import { format } from 'date-fns'
 
 export async function GET(
   request: Request,
@@ -98,7 +99,7 @@ export async function POST(
       try {
         const invoiceData = {
           id: new ObjectId().toString(),
-          date: new Date().toISOString(),
+          date: format(new Date(), 'MM/dd/yyyy'),
         }
 
         const fileName = await generateInvoice(

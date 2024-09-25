@@ -15,6 +15,7 @@ import {
   helveticaBoldPath,
   helveticaPath,
 } from "./createInvoice";
+import { ObjectId } from "mongodb";
 
 const GAP = 20;
 const MARGIN = 50;
@@ -48,7 +49,7 @@ async function generateInvoice(template: ITemplate, worker: Worker, agency: Agen
   const doc = new PDFDocument({ size: "A4", margin: MARGIN, font: helveticaPath });
 
   try {
-    let y = generateHeader(doc);
+    let y = generateHeader(doc, agency.name);
 
     y += GAP;
 
@@ -87,7 +88,7 @@ async function generateInvoice(template: ITemplate, worker: Worker, agency: Agen
     await invoiceCollection.insertOne({
       fileName,
       createdAt: new Date(),
-      worker: worker.id,
+      worker: new ObjectId(worker.id),
       agency: agency.name,
       template: template.name,
       amount: worker.workedHours * (worker.hourlyRate || 50), // Calculate total amount

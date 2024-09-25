@@ -8,11 +8,11 @@ export const helveticaBoldPath = path.join(process.cwd(), "public/fonts/Helvetic
 
 // Utility functions
 
-export function generateHeader(doc: PDFKit.PDFDocument): number {
+export function generateHeader(doc: PDFKit.PDFDocument, title: string): number {
   doc
     .fontSize(20)
     .font(helveticaBoldPath)
-    .text("Invoice", MARGIN, MARGIN)
+    .text(title, MARGIN, MARGIN)
     .moveDown();
 
   return 70;

@@ -2,24 +2,36 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-interface ITemplate {
+export type BlockValue = 
+    | "worker.id"
+    | "worker.name"
+    | "worker.email"
+    | "worker.age"
+    | "worker.address"
+    | "worker.workedHours"
+    | "invoice.id"
+    | "invoice.date"
+    | "agency.name";
+
+export type BlockProps = {
+    internalId: number;
+    title: string;
+    field: BlockValue;
+    type: 'vertical';
+} | {
+    internalId: number;
+    type: 'horizontal';
+    keyValues: Array<{ key: string; value: BlockValue }>;
+}
+
+export interface ITemplate {
     name: string;
     description: string;
     columns: string[];
     lines: Array<{
         type: 'text' | 'items';
-        left?: {
-            internalId: number;
-            title: string;
-            field: string;
-            type: 'vertical' | 'horizontal';
-        };
-        right?: {
-            internalId: number;
-            title: string;
-            field: string;
-            type: 'vertical' | 'horizontal';
-        };
+        left?: BlockProps;
+        right?: BlockProps;
     }>;
 }
 

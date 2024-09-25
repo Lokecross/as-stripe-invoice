@@ -3,7 +3,6 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import { v4 as uuidv4 } from 'uuid';
 import clientPromise from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
 
 const GAP = 20;
 const MARGIN = 50;
@@ -40,7 +39,6 @@ interface Invoice {
     subtotal: number;
     tax: number;
   };
-  workerId: string;
 }
 
 const helveticaPath = path.join(process.cwd(), "public/fonts/Helvetica.ttf");
@@ -85,7 +83,6 @@ async function createInvoice(invoice: Invoice): Promise<string> {
     fileName,
     createdAt: new Date(),
     invoice,
-    worker: new ObjectId(invoice.workerId),
   });
 
   return fileName;

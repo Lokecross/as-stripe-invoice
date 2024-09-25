@@ -4,6 +4,11 @@ import { ObjectId } from 'mongodb'
 import { generateInvoice } from '@/app/api/invoice/generateInvoice'
 import { ITemplate } from '../template/route'
 import { format } from 'date-fns'
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-06-20',
+})
 
 export async function GET(
   request: Request,
@@ -37,7 +42,8 @@ export async function GET(
           amount: 1,
           status: 1,
           createdAt: 1,
-          'worker.name': 1
+          'worker.name': 1,
+          paymentLink: 1
         }
       }
     ]).toArray()
@@ -118,10 +124,45 @@ export async function POST(
           invoiceData
         )
 
+        // Calculate the total amount for the invoice
+        const totalAmount = (worker.workedHours + worker.overdueHours) * worker.hourlyRate
+
+        // Create a Stripe price for this specific invoice
+        const price = await stripe.prices.create({
+          unit_amount: Math.round(totalAmount * 100), // Stripe expects amount in cents
+          currency: 'usd',
+          product_data: {
+            name: `Invoice for ${worker.name}`,
+          },
+        })
+
+        // Create a Stripe payment link using the created price
+        const paymentLink = await stripe.paymentLinks.create({
+          line_items: [
+            {
+              price: price.id,
+              quantity: 1,
+            },
+          ],
+        })
+
+        // Save the invoice information along with the payment link
+        const invoiceResult = await db.collection('invoices').insertOne({
+          fileName,
+          worker: worker._id,
+          agency: new ObjectId(params.agencyId),
+          amount: totalAmount,
+          status: 'pending',
+          createdAt: new Date(),
+          paymentLink: paymentLink.url,
+        })
+
         generatedInvoices.push({
           fileName,
           workerId: worker._id,
-          workerName: worker.name
+          workerName: worker.name,
+          paymentLink: paymentLink.url,
+          invoiceId: invoiceResult.insertedId,
         })
       } catch (error) {
         console.error(`Error generating invoice for worker ${worker._id}:`, error)

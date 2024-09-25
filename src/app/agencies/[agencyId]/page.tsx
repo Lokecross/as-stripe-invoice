@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PencilIcon, EyeIcon } from 'lucide-react'
+import { PencilIcon, EyeIcon, ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from "@/components/ui/use-toast"
 
@@ -268,10 +268,18 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleViewInvoice(invoice.fileName)}>
-                        <EyeIcon className="mr-2 h-4 w-4" />
-                        View
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleViewInvoice(invoice.fileName)}>
+                          <EyeIcon className="mr-2 h-4 w-4" />
+                          View
+                        </Button>
+                        {invoice.paymentLink && (
+                          <Button variant="outline" size="sm" onClick={() => window.open(invoice.paymentLink, '_blank')}>
+                            <ExternalLinkIcon className="mr-2 h-4 w-4" />
+                            Pay
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -12,7 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PencilIcon } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PencilIcon, EyeIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from "@/components/ui/use-toast"
 
@@ -25,25 +26,30 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
   const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
   const { toast } = useToast()
 
-  useEffect(() => {
-    const fetchAgencyData = async () => {
-      try {
-        const agencyResponse = await fetch(`/api/agencies/${params.agencyId}`)
-        const agencyData = await agencyResponse.json()
-        setAgency(agencyData)
+  const fetchAgencyData = async () => {
+    try {
+      const agencyResponse = await fetch(`/api/agencies/${params.agencyId}`)
+      const agencyData = await agencyResponse.json()
+      setAgency(agencyData)
 
-        const workersResponse = await fetch(`/api/agencies/${params.agencyId}/workers`)
-        const workersData = await workersResponse.json()
-        setWorkers(workersData)
+      const workersResponse = await fetch(`/api/agencies/${params.agencyId}/workers`)
+      const workersData = await workersResponse.json()
+      setWorkers(workersData)
 
-        const invoicesResponse = await fetch(`/api/agencies/${params.agencyId}/invoices`)
-        const invoicesData = await invoicesResponse.json()
-        setInvoices(invoicesData)
-      } catch (error) {
-        console.error('Error fetching agency data:', error)
-      }
+      const invoicesResponse = await fetch(`/api/agencies/${params.agencyId}/invoices`)
+      const invoicesData = await invoicesResponse.json()
+      setInvoices(invoicesData)
+    } catch (error) {
+      console.error('Error fetching agency data:', error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch agency data. Please refresh the page.",
+        variant: "destructive",
+      })
     }
+  }
 
+  useEffect(() => {
     fetchAgencyData()
   }, [params.agencyId])
 
@@ -74,25 +80,77 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
         body: JSON.stringify({ workerIds: selectedWorkers }),
       })
 
+      const result = await response.json()
+
       if (response.ok) {
         toast({
-          title: "Invoices generated",
-          description: `Successfully generated invoices for ${selectedWorkers.length} worker(s).`,
+          title: "Invoice Generation Complete",
+          description: `Successfully generated ${result.generatedInvoices.length} invoice(s) out of ${result.totalWorkers} selected worker(s).${result.errors.length > 0 ? ` ${result.errors.length} error(s) occurred.` : ''}`,
         })
-        // Refresh the invoices list
-        const invoicesResponse = await fetch(`/api/agencies/${params.agencyId}/invoices`)
-        const invoicesData = await invoicesResponse.json()
-        setInvoices(invoicesData)
+        // Refresh the data
+        await fetchAgencyData()
         // Clear selection
         setSelectedWorkers([])
       } else {
-        throw new Error('Failed to generate invoices')
+        throw new Error(result.error || 'Failed to generate invoices')
       }
     } catch (error) {
       console.error('Error generating invoices:', error)
       toast({
         title: "Error",
-        description: "Failed to generate invoices. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate invoices. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleViewInvoice = async (fileName: string) => {
+    try {
+      const response = await fetch(`/invoices/${fileName}`)
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        window.open(url, '_blank')
+      } else {
+        throw new Error('Invoice not found')
+      }
+    } catch (error) {
+      console.error('Error viewing invoice:', error)
+      toast({
+        title: "Error",
+        description: "Failed to view invoice. The file may not exist or be accessible.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleStatusChange = async (invoiceId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/agencies/${params.agencyId}/invoices`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ invoiceId, status: newStatus }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Status Updated",
+          description: "Invoice status has been successfully updated.",
+        })
+        // Refresh the invoices data
+        const invoicesResponse = await fetch(`/api/agencies/${params.agencyId}/invoices`)
+        const invoicesData = await invoicesResponse.json()
+        setInvoices(invoicesData)
+      } else {
+        throw new Error('Failed to update invoice status')
+      }
+    } catch (error) {
+      console.error('Error updating invoice status:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update invoice status. Please try again.",
         variant: "destructive",
       })
     }
@@ -145,6 +203,8 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Worked Hours</TableHead>
+                  <TableHead>Hourly Rate</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -158,6 +218,8 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
                       {worker.name}
                     </TableCell>
                     <TableCell>{worker.email}</TableCell>
+                    <TableCell>{worker.workedHours || 0}</TableCell>
+                    <TableCell>${worker.hourlyRate || 0}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -175,9 +237,12 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Invoice Number</TableHead>
-                  <TableHead>Client</TableHead>
+                  <TableHead>Invoice ID</TableHead>
+                  <TableHead>Worker</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,14 +250,28 @@ export default function AgencyDetails({ params }: { params: { agencyId: string }
                   <TableRow key={invoice._id}>
                     <TableCell>{invoice._id}</TableCell>
                     <TableCell>{invoice.worker.name}</TableCell>
+                    <TableCell>${invoice.amount}</TableCell>
+                    <TableCell>{new Date(invoice.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-                        invoice.status === 'Paid' ? 'bg-green-100 text-green-800' :
-                        invoice.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {invoice.status}
-                      </span>
+                      <Select
+                        defaultValue={invoice.status}
+                        onValueChange={(value) => handleStatusChange(invoice._id, value)}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Paid">Paid</SelectItem>
+                          <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => handleViewInvoice(invoice.fileName)}>
+                        <EyeIcon className="mr-2 h-4 w-4" />
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
